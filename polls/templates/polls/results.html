@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}index{% endblock %}
+
+{% block content %}
+<h1>{{ question.question_text }}</h1>
+
+<ul>
+    {% for choice in question.choice_set.all %}
+        <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
+    {%  endfor %}
+</ul>
+<P>♥응답해 주셔서 감사합니다♥</P>
+<a href="{% url 'polls:index' %}" class="btn btn-info">목록으로</a>
+<a href="http://127.0.0.1:8000/bookmark/" class="btn btn-primary">메인으로</a>
+{% endblock %}

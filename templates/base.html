@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <style type="text/css">* {cursor: url(http://cur.cursors-4u.net/symbols/sym-2/sym184.ani), url(http://cur.cursors-4u.net/symbols/sym-2/sym184.png), auto !important;}</style><a href="http://www.cursors-4u.com/cursor/2008/11/08/spinning-star-with-falling-stars.html" target="_blank" title="Spinning Star With Falling Stars"><img src="http://cur.cursors-4u.net/cursor.png" border="0" alt="Spinning Star With Falling Stars" style="position:absolute; top: 0px; right: 0px;" /></a>
+
+    <title>{% block title %}{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script type="text/javascript">
+// <![CDATA[
+var sparks=75; // how many sparks per clicksplosion
+var speed=33; // how fast - smaller is faster
+var bangs=5; // how many can be launched simultaneously (note that using too many can slow the script down)
+var colours=new Array('#78C2AD', '#F3969A', '#FFCE67', '#6CC3D5', '#FF7851', '#56CC9D', '#FFCE67');
+//                     blue    red     green   purple  cyan    orange  pink
+
+/****************************
+*   Clicksplosion Effect    *
+*(c)2012-3 mf2fm web-design *
+*  http://www.mf2fm.com/rv  *
+* DON'T EDIT BELOW THIS BOX *
+****************************/
+var intensity=new Array();
+var Xpos=new Array();
+var Ypos=new Array();
+var dX=new Array();
+var dY=new Array();
+var stars=new Array();
+var decay=new Array();
+var timers=new Array();
+var swide=800;
+var shigh=600;
+var sleft=sdown=0;
+var count=0;
+
+function addLoadEvent(funky) {
+  var oldonload=window.onload;
+  if (typeof(oldonload)!='function') window.onload=funky;
+  else window.onload=function() {
+    if (oldonload) oldonload();
+    funky();
+  }
+}
+
+addLoadEvent(clicksplode);
+
+function clicksplode() { if (document.getElementById) {
+  var i, j;
+  window.onscroll=set_scroll;
+  window.onresize=set_width;
+  document.onclick=eksplode;
+  set_width();
+  set_scroll();
+  for (i=0; i<bangs; i++) for (j=sparks*i; j<sparks+sparks*i; j++) {
+    stars[j]=createDiv('*', 13);
+    document.body.appendChild(stars[j]);
+  }
+}}
+
+function createDiv(char, size) {
+  var div, sty;
+  div=document.createElement('div');
+  sty=div.style;
+  sty.font=size+'px monospace';
+  sty.position='absolute';
+  sty.backgroundColor='transparent';
+  sty.visibility='hidden';
+  sty.zIndex='101';
+  div.appendChild(document.createTextNode(char));
+  return (div);
+}
+
+function bang(N) {
+  var i, Z, A=0;
+  for (i=sparks*N; i<sparks*(N+1); i++) {
+    if (decay[i]) {
+      Z=stars[i].style;
+      Xpos[i]+=dX[i];
+      Ypos[i]+=(dY[i]+=1.25/intensity[N]);
+      if (Xpos[i]>=swide || Xpos[i]<0 || Ypos[i]>=shigh+sdown || Ypos[i]<0) decay[i]=1;
+	  else {
+        Z.left=Xpos[i]+'px';
+        Z.top=Ypos[i]+'px';
+	  }
+      if (decay[i]==15) Z.fontSize='7px';
+      else if (decay[i]==7) Z.fontSize='2px';
+      else if (decay[i]==1) Z.visibility='hidden';
+	  decay[i]--;
+	}
+	else A++;
+  }
+  if (A!=sparks) timers[N]=setTimeout('bang('+N+')', speed);
+}
+
+function eksplode(e) {
+  var x, y, i, M, Z, N;
+  set_scroll();
+  y=(e)?e.pageY:event.y+sdown;
+  x=(e)?e.pageX:event.x+sleft;
+  N=++count%bangs;
+  M=Math.floor(Math.random()*3*colours.length);
+  intensity[N]=5+Math.random()*4;
+  for (i=N*sparks; i<(N+1)*sparks; i++) {
+    Xpos[i]=x;
+    Ypos[i]=y-5;
+    dY[i]=(Math.random()-0.5)*intensity[N];
+    dX[i]=(Math.random()-0.5)*(intensity[N]-Math.abs(dY[i]))*1.25;
+    decay[i]=16+Math.floor(Math.random()*16);
+    Z=stars[i].style;
+    if (M<colours.length) Z.color=colours[i%2?count%colours.length:M];
+    else if (M<2*colours.length) Z.color=colours[count%colours.length];
+    else Z.color=colours[i%colours.length];
+    Z.fontSize='13px';
+    Z.visibility='visible';
+  }
+  clearTimeout(timers[N]);
+  bang(N);
+}
+
+function set_width() {
+  var sw_min=999999;
+  var sh_min=999999;
+  if (document.documentElement && document.documentElement.clientWidth) {
+    if (document.documentElement.clientWidth>0) sw_min=document.documentElement.clientWidth;
+    if (document.documentElement.clientHeight>0) sh_min=document.documentElement.clientHeight;
+  }
+  if (typeof(self.innerWidth)=='number' && self.innerWidth) {
+    if (self.innerWidth>0 && self.innerWidth<sw_min) sw_min=self.innerWidth;
+    if (self.innerHeight>0 && self.innerHeight<sh_min) sh_min=self.innerHeight;
+  }
+  if (document.body.clientWidth) {
+    if (document.body.clientWidth>0 && document.body.clientWidth<sw_min) sw_min=document.body.clientWidth;
+    if (document.body.clientHeight>0 && document.body.clientHeight<sh_min) sh_min=document.body.clientHeight;
+  }
+  if (sw_min==999999 || sh_min==999999) {
+    sw_min=800;
+    sh_min=600;
+  }
+  swide=sw_min-7;
+  shigh=sh_min-7;
+}
+
+function set_scroll() {
+  if (typeof(self.pageYOffset)=='number') {
+    sdown=self.pageYOffset;
+    sleft=self.pageXOffset;
+  }
+  else if (document.body && (document.body.scrollTop || document.body.scrollLeft)) {
+    sdown=document.body.scrollTop;
+    sleft=document.body.scrollLeft;
+  }
+  else if (document.documentElement && (document.documentElement.scrollTop || document.documentElement.scrollLeft)) {
+    sleft=document.documentElement.scrollLeft;
+    sdown=document.documentElement.scrollTop;
+  }
+  else {
+    sdown=0;
+    sleft=0;
+  }
+}
+// ]]>
+</script>
+
+</head>
+<body>
+    {% block content1 %}
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <a class="navbar-brand" href="#">Shoppingmall list</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarColor02">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="{% url 'mark:list' %}">Home <span class="sr-only">(current)</span></a>
+              </li>
+                {% if user.is_authenticated %}
+                <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                {% else %}
+                <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                {% endif %}
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+            <p></p>
+            <div class="row">
+                <div class="col">
+                    {% block content %}
+
+                    {% endblock %}
+
+                    {% block pagination %}
+                    {% endblock %}
+
+
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/5eb569148ee2956d739f4887/default';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+</body>
+</html>
